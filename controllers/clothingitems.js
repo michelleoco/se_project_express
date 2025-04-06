@@ -86,7 +86,7 @@ const unlikeItem = (req, res) => {
 const deleteItem = (req, res) => {
   ClothingItem.findByIdAndDelete(req.params.id)
     .orFail()
-    .then((item) => res.status(STATUS_CODES.OK).send({}))
+    .then(() => res.status(STATUS_CODES.OK).send({}))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
