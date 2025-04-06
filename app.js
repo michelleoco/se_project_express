@@ -18,10 +18,10 @@ mongoose
   .then(() => {
     console.log("Connected to DB");
   })
-  .catch(console.error); //.catch((e) => console.error(e)); is an equivilent expression
+  .catch(console.error); // .catch((e) => console.error(e)); is an equivilent expression
 
-app.use(express.json()); //middleware: put before router
-app.use("/", mainRouter); //if requests are sent to root, then send them to the userRouter
+app.use(express.json()); // middleware: put before router
+app.use("/", mainRouter); // if requests are sent to root, then send them to the userRouter
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

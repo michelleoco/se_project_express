@@ -10,7 +10,7 @@ const getUsers = (req, res) => {
       console.error(err);
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message }); //General "catch all" catch block
+        .send({ message: err.message }); // General "catch all" catch block
     });
 };
 
@@ -22,7 +22,7 @@ const createUser = (req, res) => {
     .then((user) => res.status(STATUS_CODES.CREATED).send(user))
     .catch((err) => {
       console.error(err);
-      //console.log(err.name); Checks what the error is called
+      // console.log(err.name); Checks what the error is called
       if (err.name === "ValidationError") {
         return res
           .status(STATUS_CODES.BAD_REQUEST)

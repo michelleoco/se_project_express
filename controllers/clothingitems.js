@@ -3,7 +3,7 @@ const { STATUS_CODES } = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
-  //console.log("object", name, weather, imageUrl);
+  // console.log("object", name, weather, imageUrl);
   ClothingItem.create({ name, weather, imageUrl })
     .then((items) => res.status(STATUS_CODES.CREATED).send(items))
     .catch((err) => {
@@ -26,12 +26,12 @@ const getItems = (req, res) => {
       console.error(err);
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message }); //General "catch all" catch block
+        .send({ message: err.message }); // General "catch all" catch block
     });
 };
 
 const likeItem = (req, res) => {
-  //console.log("check", req.user._id);
+  // console.log("check", req.user._id);
   ClothingItem.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
