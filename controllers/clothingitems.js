@@ -22,7 +22,7 @@ const createItem = (req, res) => {
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .then((items) => res.status(STATUS_CODES.OK).send(items))
+    .then((items) => res.send(items))
     .catch((err) => {
       console.error(err);
       return res
@@ -39,7 +39,7 @@ const likeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then((item) => res.status(STATUS_CODES.OK).send(item))
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -65,7 +65,7 @@ const unlikeItem = (req, res) => {
     { new: true }
   )
     .orFail()
-    .then((item) => res.status(STATUS_CODES.OK).send(item))
+    .then((item) => res.send(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
@@ -87,7 +87,7 @@ const unlikeItem = (req, res) => {
 const deleteItem = (req, res) => {
   ClothingItem.findByIdAndDelete(req.params.id)
     .orFail()
-    .then((deletedItem) => res.status(STATUS_CODES.OK).send({ deletedItem }))
+    .then((deletedItem) => res.send({ deletedItem }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
