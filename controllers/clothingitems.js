@@ -4,18 +4,19 @@ const { STATUS_CODES } = require("../utils/errors");
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   // console.log("object", name, weather, imageUrl);
-  ClothingItem.create({ name, weather, imageUrl })
+  ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((items) => res.status(STATUS_CODES.CREATED).send(items))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: err.message });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({
+          message:
+            "Invalid data - please ensure all required fields are filled in",
+        });
       }
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -26,7 +27,7 @@ const getItems = (req, res) => {
       console.error(err);
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message }); // General "catch all" catch block
+        .send({ message: "An error has occurred on the server" }); // General "catch all" catch block
     });
 };
 
@@ -53,7 +54,7 @@ const likeItem = (req, res) => {
       }
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -79,14 +80,14 @@ const unlikeItem = (req, res) => {
       }
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
 const deleteItem = (req, res) => {
   ClothingItem.findByIdAndDelete(req.params.id)
     .orFail()
-    .then(() => res.status(STATUS_CODES.OK).send({}))
+    .then((deletedItem) => res.status(STATUS_CODES.OK).send({ deletedItem }))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {

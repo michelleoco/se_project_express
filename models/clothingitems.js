@@ -27,10 +27,10 @@ const clothingItems = new mongoose.Schema({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     default: [],
   },
-  // owner: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   required: true,
-  // },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
   createAt: {
     type: Date,
     default: Date.now,

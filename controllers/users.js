@@ -10,7 +10,7 @@ const getUsers = (req, res) => {
       console.error(err);
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message }); // General "catch all" catch block
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -24,13 +24,13 @@ const createUser = (req, res) => {
       console.error(err);
       // console.log(err.name); Checks what the error is called
       if (err.name === "ValidationError") {
-        return res
-          .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: err.message });
+        return res.status(STATUS_CODES.BAD_REQUEST).send({
+          message: "Invalid data - please ensure name and avatar are provided",
+        });
       }
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message });
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -46,16 +46,16 @@ const getUserById = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         return res
           .status(STATUS_CODES.NOT_FOUND)
-          .send({ message: err.message });
+          .send({ message: "User not found" });
       }
       if (err.name === "CastError") {
         return res
           .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: err.message });
+          .send({ message: "Invalid user ID" });
       }
       return res
         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: err.message });
+        .send({ message: "An error occurred on the server" });
     });
 };
 
