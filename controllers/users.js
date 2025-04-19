@@ -1,14 +1,12 @@
-const User = require("../models/users");
-const { STATUS_CODES } = require("../utils/errors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/users");
+const { STATUS_CODES } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 // POST
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  console.log("1. Starting user creation with:", { name, email }); // Add this
-
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
@@ -17,15 +15,8 @@ const createUser = (req, res) => {
       delete userObject.password;
       res.status(STATUS_CODES.CREATED).send(userObject);
     })
-
     .catch((err) => {
       console.error(err);
-      // console.log("ERROR", err.name); // Checks what the error is called
-      console.log("Error details:", {
-        errorName: err.name,
-        errorMessage: err.message,
-        errorCode: err.code,
-      });
       if (err.name === "ValidationError") {
         const invalidFields = Object.keys(err.errors).join(", ");
         return res.status(STATUS_CODES.BAD_REQUEST).send({
@@ -46,8 +37,8 @@ const createUser = (req, res) => {
 
 // GET
 const getCurrentUser = (req, res) => {
-  const { _id } = req.user; // Dot said replace userId with _id
-  User.findById(_id) // Dot said replace userId with _id
+  const { _id } = req.user;
+  User.findById(_id)
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => {
@@ -70,8 +61,12 @@ const getCurrentUser = (req, res) => {
 
 const login = (req, res) => {
   const { email, password } = req.body;
-
-  User.findUserByCredentials(email, password)
+  if (!email || !password) {
+    return res
+      .status(STATUS_CODES.BAD_REQUEST)
+      .send({ message: "The password and email fields are required" });
+  }
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -80,9 +75,14 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res
-        .status(STATUS_CODES.BAD_REQUEST)
-        .send({ message: "Incorrect email or password" });
+      if (err.message === "Incorrect email or password") {
+        return res
+          .status(STATUS_CODES.UNAUTHORIZED)
+          .send({ message: "Incorrect email or password" });
+      }
+      return res
+        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
     });
 };
 

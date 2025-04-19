@@ -8,7 +8,9 @@ const auth = (req, res, next) => {
 
   // Check if authorization header exists
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res.status(401).send({ message: "Authorization required" });
+    return res
+      .status(STATUS_CODES.UNAUTHORIZED)
+      .send({ message: "Authorization required" });
   }
 
   // Get token from authorization header
@@ -22,7 +24,7 @@ const auth = (req, res, next) => {
     req.user = payload;
 
     // Move to next middleware
-    next();
+    return next();
   } catch (err) {
     // Handle token verification errors
     return res

@@ -89,10 +89,9 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        return Promise.reject({
-          statusCode: STATUS_CODES.FORBIDDEN,
-          message: "Forbidden",
-        });
+        const error = new Error("Forbidden");
+        error.statusCode = STATUS_CODES.FORBIDDEN;
+        return Promise.reject(error);
       }
       return ClothingItem.findByIdAndDelete(req.params.id);
     })
