@@ -85,11 +85,25 @@ const unlikeItem = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  ClothingItem.findByIdAndDelete(req.params.id)
+  ClothingItem.findById(req.params.id)
     .orFail()
+    .then((item) => {
+      if (!item.owner.equals(req.user._id)) {
+        return Promise.reject({
+          statusCode: STATUS_CODES.FORBIDDEN,
+          message: "Forbidden",
+        });
+      }
+      return ClothingItem.findByIdAndDelete(req.params.id);
+    })
     .then((deletedItem) => res.send({ deletedItem }))
     .catch((err) => {
       console.error(err);
+      if (err.statusCode === STATUS_CODES.FORBIDDEN) {
+        return res
+          .status(STATUS_CODES.FORBIDDEN)
+          .send({ message: err.message });
+      }
       if (err.name === "CastError") {
         return res
           .status(STATUS_CODES.BAD_REQUEST)

@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const auth = require("../middlewares/auth");
 
 const {
   createItem,
@@ -8,19 +9,15 @@ const {
   deleteItem,
 } = require("../controllers/clothingitems");
 
-// Create
+// Public routes
+router.get("/", getItems); // Read
 
-router.post("/", createItem);
+// Auth middleware
+router.use(auth);
 
-// Read
-
-router.get("/", getItems);
-
-// Update
-
-router.put("/:id/likes", likeItem);
-
-// Delete
+// Protected routes
+router.post("/", createItem); // Create
+router.put("/:id/likes", likeItem); // Update
 
 router.delete("/:id/likes", unlikeItem);
 router.delete("/:id", deleteItem);

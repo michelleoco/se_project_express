@@ -1,16 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const cors = require("cors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: "67f16864ec81e1549d9aa63d", // paste the _id of the test user created in the previous step
-  };
-  next();
-});
 
 // connect to the MongoDB server
 mongoose
@@ -20,6 +14,7 @@ mongoose
   })
   .catch(console.error); // .catch((e) => console.error(e)); is an equivilent expression
 
+app.use(cors());
 app.use(express.json()); // middleware: put before router
 app.use("/", mainRouter); // if requests are sent to root, then send them to the userRouter
 
