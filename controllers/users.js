@@ -1,11 +1,17 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/users");
-const { STATUS_CODES } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const {
+  STATUS_CODES,
+  BadRequestError,
+  NotFoundError,
+  ConflictError,
+  UnauthorizedError,
+} = require("../utils/errors");
 
 // POST
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
     .hash(password, 10)
@@ -19,24 +25,25 @@ const createUser = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError") {
         const invalidFields = Object.keys(err.errors).join(", ");
-        return res.status(STATUS_CODES.BAD_REQUEST).send({
-          message: `Invalid data - The following fields are required: ${invalidFields}`,
-        });
+        next(
+          new BadRequestError(
+            `Invalid data - The following fields are required: ${invalidFields}`
+          )
+        );
+      } else if (err.code === 11000) {
+        next(
+          new ConflictError(
+            "An account with this email already exists- please use a different email"
+          )
+        );
+      } else {
+        next(err);
       }
-      if (err.code === 11000) {
-        return res.status(STATUS_CODES.CONFLICT_ERROR).send({
-          message:
-            "An account with this email already exists- please use a different email",
-        });
-      }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
 // GET
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
   User.findById(_id)
     .orFail()
@@ -44,27 +51,21 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(STATUS_CODES.NOT_FOUND)
-          .send({ message: "User not found" });
+        next(new NotFoundError("User not found"));
+      } else if (err.name === "CastError") {
+        next(new BadRequestError("Invalid user ID"));
+      } else {
+        next(err);
       }
-      if (err.name === "CastError") {
-        return res
-          .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: "Invalid user ID" });
-      }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res
-      .status(STATUS_CODES.BAD_REQUEST)
-      .send({ message: "The password and email fields are required" });
+    return next(
+      new BadRequestError("The password and email fields are required")
+    );
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -76,17 +77,14 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(STATUS_CODES.UNAUTHORIZED)
-          .send({ message: "Incorrect email or password" });
+        next(new UnauthorizedError("Incorrect email or password"));
+      } else {
+        next(err);
       }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -104,19 +102,17 @@ const updateProfile = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(STATUS_CODES.NOT_FOUND)
-          .send({ message: "User not found" });
-      }
-      if (err.name === "ValidationError") {
+        next(new NotFoundError("User not found"));
+      } else if (err.name === "ValidationError") {
         const invalidFields = Object.keys(err.errors).join(", ");
-        return res.status(STATUS_CODES.BAD_REQUEST).send({
-          message: `Invalid data - The following fields are required: ${invalidFields}`,
-        });
+        next(
+          new BadRequestError(
+            `Invalid data - The following fields are required: ${invalidFields}`
+          )
+        );
+      } else {
+        next(err);
       }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
     });
 };
 

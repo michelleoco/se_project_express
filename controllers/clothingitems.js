@@ -1,41 +1,44 @@
 const ClothingItem = require("../models/clothingitems");
-const { STATUS_CODES } = require("../utils/errors");
+const {
+  STATUS_CODES,
+  BadRequestError,
+  NotFoundError,
+  ForbiddenError,
+} = require("../utils/errors");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
-  // console.log("object", name, weather, imageUrl);
+
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((items) => res.status(STATUS_CODES.CREATED).send(items))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(STATUS_CODES.BAD_REQUEST).send({
-          message:
-            "Invalid data - please ensure all required fields are filled in",
-        });
+        const invalidFields = Object.keys(err.errors).join(", ");
+        next(
+          new BadRequestError(
+            `Invalid data - The following fields are required: ${invalidFields}`
+          )
+        );
+      } else {
+        next(err);
       }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
     .catch((err) => {
       console.error(err);
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" }); // General "catch all" catch block
+      next(err);
     });
 };
 
-const likeItem = (req, res) => {
-  // console.log("check", req.user._id);
+const likeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.id,
-    { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
+    { $addToSet: { likes: req.user._id } },
     { new: true }
   )
     .orFail()
@@ -43,80 +46,81 @@ const likeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res
-          .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: "Invalid item ID" });
+        next(new BadRequestError("Invalid item ID"));
+      } else if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else {
+        next(err);
       }
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(STATUS_CODES.NOT_FOUND)
-          .send({ message: "Item not found" });
-      }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
-const unlikeItem = (req, res) => {
+const unlikeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.id,
-    { $pull: { likes: req.user._id } }, // remove _id from the array
+    { $pull: { likes: req.user._id } },
     { new: true }
   )
     .orFail()
     .then((item) => res.send(item))
     .catch((err) => {
-      console.error(err);
       if (err.name === "CastError") {
-        return res
-          .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: "Invalid item ID" });
+        next(new BadRequestError("Invalid item ID"));
+      } else if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else {
+        next(err);
       }
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(STATUS_CODES.NOT_FOUND)
-          .send({ message: "Item not found" });
-      }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error has occurred on the server" });
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
+  // Add next parameter
   ClothingItem.findById(req.params.id)
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        const error = new Error("Forbidden");
-        error.statusCode = STATUS_CODES.FORBIDDEN;
-        return Promise.reject(error);
+        throw new ForbiddenError("Forbidden"); // Use custom error class
       }
       return ClothingItem.findByIdAndDelete(req.params.id);
     })
     .then((deletedItem) => res.send({ deletedItem }))
     .catch((err) => {
       console.error(err);
-      if (err.statusCode === STATUS_CODES.FORBIDDEN) {
-        return res
-          .status(STATUS_CODES.FORBIDDEN)
-          .send({ message: err.message });
-      }
       if (err.name === "CastError") {
-        return res
-          .status(STATUS_CODES.BAD_REQUEST)
-          .send({ message: "Invalid item ID" });
+        next(new BadRequestError("Invalid item ID"));
+      } else if (err.name === "DocumentNotFoundError") {
+        next(new NotFoundError("Item not found"));
+      } else if (err instanceof ForbiddenError) {
+        next(err);
+      } else {
+        next(err);
       }
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(STATUS_CODES.NOT_FOUND)
-          .send({ message: "Item not found" });
-      }
-      return res
-        .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
     });
 };
 
 module.exports = { createItem, getItems, likeItem, unlikeItem, deleteItem };
+
+//     .then((deletedItem) => res.send({ deletedItem }))
+//     .catch((err) => {
+//       console.error(err);
+//       if (err.statusCode === STATUS_CODES.FORBIDDEN) {
+//         return res
+//           .status(STATUS_CODES.FORBIDDEN)
+//           .send({ message: err.message });
+//       }
+//       if (err.name === "CastError") {
+//         return res
+//           .status(STATUS_CODES.BAD_REQUEST)
+//           .send({ message: "Invalid item ID" });
+//       }
+//       if (err.name === "DocumentNotFoundError") {
+//         return res
+//           .status(STATUS_CODES.NOT_FOUND)
+//           .send({ message: "Item not found" });
+//       }
+//       return res
+//         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+//         .send({ message: "An error occurred on the server" });
+//     });
+// };
