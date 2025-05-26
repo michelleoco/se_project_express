@@ -18,6 +18,13 @@ mongoose
   })
   .catch(console.error);
 
+// DELETE THIS CODE AFTER CODE REVIEW
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 app.use(cors());
 app.use(express.json()); // middleware: put before router
 app.use(requestLogger);
