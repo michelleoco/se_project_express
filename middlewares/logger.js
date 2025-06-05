@@ -41,7 +41,21 @@ const errorLogger = expressWinston.errorLogger({
   ],
 });
 
+// general logger
+const generalLogger = winston.createLogger({
+  transports: [
+    new winston.transports.Console({
+      format: messageFormat,
+    }),
+    new winston.transports.File({
+      filename: "general.log",
+      format: winston.format.json(),
+    }),
+  ],
+});
+
 module.exports = {
   requestLogger,
   errorLogger,
+  generalLogger,
 };

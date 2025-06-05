@@ -1,5 +1,10 @@
+const { celebrate } = require("celebrate");
 const router = require("express").Router();
 const auth = require("../middlewares/auth");
+const {
+  validateClothingItem,
+  validateId,
+} = require("../middlewares/validator");
 
 const {
   createItem,
@@ -16,10 +21,10 @@ router.get("/", getItems); // Read
 router.use(auth);
 
 // Protected routes
-router.post("/", createItem); // Create
-router.put("/:id/likes", likeItem); // Update
+router.post("/", celebrate(validateClothingItem), createItem); // Create
+router.put("/:id/likes", celebrate(validateId), likeItem); // Update
 
-router.delete("/:id/likes", unlikeItem);
-router.delete("/:id", deleteItem);
+router.delete("/:id/likes", celebrate(validateId), unlikeItem);
+router.delete("/:id", celebrate(validateId), deleteItem);
 
 module.exports = router;

@@ -1,11 +1,15 @@
+require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
+const { errors } = require("celebrate");
+const {
+  requestLogger,
+  errorLogger,
+  generalLogger,
+} = require("./middlewares/logger");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
-const { errors } = require("celebrate");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
-require("dotenv").config();
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -14,9 +18,9 @@ const { PORT = 3001 } = process.env;
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")
   .then(() => {
-    console.log("Connected to DB");
+    generalLogger.info("Connected to DB");
   })
-  .catch(console.error);
+  .catch(generalLogger.error);
 
 // DELETE THIS CODE AFTER CODE REVIEW
 app.get("/crash-test", () => {
@@ -31,8 +35,8 @@ app.use(requestLogger);
 app.use("/", mainRouter); // if requests are sent to root, then send them to the userRouter
 app.use(errorLogger); // enabling the error logger
 app.use(errors()); // celebrate error handler
-app.use(errorHandler); //centralized error handler
+app.use(errorHandler); // centralized error handler
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  generalLogger.info(`Server is running on port ${PORT}`);
 });
