@@ -10,8 +10,8 @@ const {
 } = require("../middlewares/validator");
 
 // Public routes
-router.post("/signin", celebrate(validateAuthentication), login);
-router.post("/signup", celebrate(validateUserInfo), createUser);
+router.post("/signin", validateAuthentication, login);
+router.post("/signup", validateUserInfo, createUser);
 
 router.use("/users", userRouter);
 router.use("/items", clothingItems);

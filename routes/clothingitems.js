@@ -21,10 +21,10 @@ router.get("/", getItems); // Read
 router.use(auth);
 
 // Protected routes
-router.post("/", celebrate(validateClothingItem), createItem); // Create
-router.put("/:id/likes", celebrate(validateId), likeItem); // Update
+router.post("/", validateClothingItem, createItem); // Create
+router.put("/:id/likes", validateId, likeItem); // Update
 
-router.delete("/:id/likes", celebrate(validateId), unlikeItem);
-router.delete("/:id", celebrate(validateId), deleteItem);
+router.delete("/:id/likes", validateId, unlikeItem);
+router.delete("/:id", validateId, deleteItem);
 
 module.exports = router;
