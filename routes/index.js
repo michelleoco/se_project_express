@@ -1,4 +1,3 @@
-const { celebrate } = require("celebrate");
 const router = require("express").Router();
 const clothingItems = require("./clothingitems");
 const userRouter = require("./users");

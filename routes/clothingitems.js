@@ -1,4 +1,3 @@
-const { celebrate } = require("celebrate");
 const router = require("express").Router();
 const auth = require("../middlewares/auth");
 const {
