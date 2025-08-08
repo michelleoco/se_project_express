@@ -6,7 +6,8 @@ _Weather-smart outfit recommendations, straight from your own wardrobe._
 
 ## Live Project
 
-🌐 **Domain:** [https://www.wtwr.moonangel.com/](https://www.wtwr.moonangel.com/)
+**Domain:** [https://www.wtwr.moonangel.com/](https://www.wtwr.moonangel.com/)
+**Front-End Repository:** [https://github.com/michelleoco/se_project_react](https://github.com/michelleoco/se_project_react)
 
 ---
 
@@ -79,13 +80,46 @@ The project was developed with **Node.js** and **Express.js**, connected to a **
 
 ---
 
-## Screenshots
+## Example API Responses
 
-**Homepage**  
-![Homepage Screenshot](./screenshots/homepage.png)
+### GET /clothing (Retrieve Clothing Items)
 
-**Profile**  
-![Profile Screenshot](./screenshots/profile.png)
+```json
+[
+  {
+    "_id": "6803201a49e18a82017e1f90",
+    "name": "Light Jacket",
+    "weather": "cold",
+    "imageUrl": "https://example.com/images/light-jacket.png",
+    "likes": ["640b25f8e12a4f1b9a7c33c1", "640b25f8e12a4f1b9a7c33c2"],
+    "owner": "640b25f8e12a4f1b9a7c3300",
+    "createAt": "2025-08-01T12:00:00.000Z"
+  },
+  {
+    "_id": "6803201a49e18a82017e1f91",
+    "name": "Summer T-Shirt",
+    "weather": "hot",
+    "imageUrl": "https://example.com/images/summer-tshirt.png",
+    "likes": [],
+    "owner": "640b25f8e12a4f1b9a7c3301",
+    "createAt": "2025-08-05T09:30:00.000Z"
+  }
+]
+```
+
+### POST /items (Create Item)
+
+```json
+{
+  "_id": "6803201a49e18a82017e1f92",
+  "name": "Raincoat",
+  "weather": "cold",
+  "imageUrl": "https://example.com/images/raincoat.png",
+  "likes": [],
+  "owner": "640b25f8e12a4f1b9a7c3302",
+  "createAt": "2025-08-07T15:45:00.000Z"
+}
+```
 
 ---
 
