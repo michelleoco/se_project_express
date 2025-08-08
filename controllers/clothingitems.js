@@ -78,7 +78,7 @@ const deleteItem = (req, res, next) => {
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        throw new ForbiddenError("Forbidden"); // Use custom error class
+        throw new ForbiddenError("Forbidden");
       }
       return ClothingItem.findByIdAndDelete(req.params.id);
     })
@@ -98,27 +98,3 @@ const deleteItem = (req, res, next) => {
 };
 
 module.exports = { createItem, getItems, likeItem, unlikeItem, deleteItem };
-
-//     .then((deletedItem) => res.send({ deletedItem }))
-//     .catch((err) => {
-//       console.error(err);
-//       if (err.statusCode === STATUS_CODES.FORBIDDEN) {
-//         return res
-//           .status(STATUS_CODES.FORBIDDEN)
-//           .send({ message: err.message });
-//       }
-//       if (err.name === "CastError") {
-//         return res
-//           .status(STATUS_CODES.BAD_REQUEST)
-//           .send({ message: "Invalid item ID" });
-//       }
-//       if (err.name === "DocumentNotFoundError") {
-//         return res
-//           .status(STATUS_CODES.NOT_FOUND)
-//           .send({ message: "Item not found" });
-//       }
-//       return res
-//         .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
-//         .send({ message: "An error occurred on the server" });
-//     });
-// };

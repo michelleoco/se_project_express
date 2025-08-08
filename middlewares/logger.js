@@ -1,17 +1,6 @@
 const winston = require("winston");
 const expressWinston = require("express-winston");
 
-// The winston.format function allows us to customize how our logs
-// are formatted. In this case, we are using a built-in timestamp
-// format, as well as Winston's generic printf method.
-// const messageFormat = winston.format.combine(
-//   winston.format.timestamp(),
-//   winston.format.printf(
-//     ({ level, message, meta, timestamp }) =>
-//       `${timestamp} ${level}: ${meta.error?.stack || message}`
-//   )
-// );
-
 const messageFormat = winston.format.json();
 
 // The request logger, with two different "transports". One transport

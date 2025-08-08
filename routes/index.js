@@ -15,11 +15,6 @@ router.post("/signup", validateUserInfo, createUser);
 router.use("/users", userRouter);
 router.use("/items", clothingItems);
 
-// 404 handler
-// router.use((req, res) => {
-//   res.status(STATUS_CODES.NOT_FOUND).send({ message: "Router not found" });
-// });
-
 router.use((req, res, next) => next(new NotFoundError("Router not found")));
 
 module.exports = router;
